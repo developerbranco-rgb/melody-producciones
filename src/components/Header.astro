@@ -1,0 +1,294 @@
+---
+/**
+ * Encabezado fijo: transparente sobre la portada, sólido al desplazarse.
+ * En celulares el menú se despliega con un botón accesible.
+ */
+import { Image } from 'astro:assets';
+import emblem from '../assets/brand/emblema-circulo.png';
+import Icon from './Icon.astro';
+import { getUi } from '../i18n';
+import { withBase, homeSection } from '../utils/paths';
+import { generalWhatsappUrl } from '../data';
+
+const ui = getUi();
+const links = [
+  { href: homeSection('inicio'), label: ui.nav.home },
+  { href: homeSection('artistas'), label: ui.nav.artists },
+  { href: homeSection('nosotros'), label: ui.nav.about },
+  { href: homeSection('contacto'), label: ui.nav.contact },
+];
+---
+
+<header class="site-header" data-header>
+  <div class="container site-header__inner">
+    <a class="brand" href={withBase()}>
+      <Image src={emblem} alt="" width={44} height={44} densities={[1, 2]} class="brand__emblem" loading="eager" />
+      <span class="brand__text">
+        <span class="brand__name">Melody</span>
+        <span class="brand__sub">Producciones</span>
+      </span>
+      <span class="sr-only">, {ui.nav.home}</span>
+    </a>
+
+    <button
+      class="menu-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="menu-principal"
+      data-menu-toggle
+      data-label-open={ui.nav.openMenu}
+      data-label-close={ui.nav.closeMenu}
+    >
+      <span class="sr-only" data-menu-label>{ui.nav.openMenu}</span>
+      <Icon name="menu" class="menu-toggle__open" />
+      <Icon name="close" class="menu-toggle__close" />
+    </button>
+
+    <nav class="nav" id="menu-principal" aria-label={ui.nav.label} data-menu>
+      <ul role="list" class="nav__list">
+        {
+          links.map((l) => (
+            <li>
+              <a class="nav__link" href={l.href}>
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <a class="btn btn--primary btn--sm nav__cta" href={generalWhatsappUrl} target="_blank" rel="noopener">
+        <Icon name="whatsapp" />
+        {ui.nav.cta}<span class="sr-only"> por WhatsApp {ui.artist.opensNewTab}</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  const label = document.querySelector<HTMLElement>('[data-menu-label]');
+
+  // Fondo sólido al desplazarse
+  let ticking = false;
+  const update = () => {
+    header?.classList.toggle('is-solid', window.scrollY > 24);
+    ticking = false;
+  };
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    },
+    { passive: true }
+  );
+  update();
+
+  // Menú móvil
+  const setOpen = (open: boolean) => {
+    if (!toggle || !header) return;
+    toggle.setAttribute('aria-expanded', String(open));
+    header.classList.toggle('is-open', open);
+    if (label) label.textContent = open ? toggle.dataset.labelClose! : toggle.dataset.labelOpen!;
+  };
+  toggle?.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+  menu?.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
+  window.matchMedia('(min-width: 60rem)').addEventListener('change', () => setOpen(false));
+</script>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    height: var(--header-h);
+    transition:
+      background-color var(--dur) ease,
+      box-shadow var(--dur) ease,
+      backdrop-filter var(--dur) ease;
+  }
+  .site-header::before {
+    /* Degradé suave para legibilidad sobre la portada */
+    content: '';
+    position: absolute;
+    inset: 0 0 -2rem;
+    background: linear-gradient(to bottom, rgb(6 8 12 / 0.7), transparent);
+    pointer-events: none;
+    transition: opacity var(--dur) ease;
+  }
+  .site-header.is-solid,
+  .site-header.is-open {
+    background: rgb(8 12 18 / 0.92);
+    backdrop-filter: blur(14px) saturate(1.2);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    box-shadow: 0 1px 0 var(--color-border);
+  }
+  .site-header.is-solid::before,
+  .site-header.is-open::before {
+    opacity: 0;
+  }
+  .site-header__inner {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    text-decoration: none;
+    border-radius: 999px;
+  }
+  .brand__emblem {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    transition: transform var(--dur) var(--ease-out);
+  }
+  .brand:hover .brand__emblem {
+    transform: rotate(-8deg) scale(1.05);
+  }
+  .brand__text {
+    display: grid;
+    line-height: 1;
+  }
+  .brand__name {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .brand__sub {
+    margin-top: 0.2rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--color-accent-text);
+  }
+
+  .menu-toggle {
+    display: grid;
+    place-items: center;
+    width: 2.9rem;
+    height: 2.9rem;
+    border-radius: 50%;
+    border: 1px solid var(--color-border-strong);
+    transition: background-color var(--dur-fast);
+  }
+  .menu-toggle:hover {
+    background: rgb(255 255 255 / 0.08);
+  }
+  .menu-toggle :global(.menu-toggle__close),
+  .is-open .menu-toggle :global(.menu-toggle__open) {
+    display: none;
+  }
+  .is-open .menu-toggle :global(.menu-toggle__close) {
+    display: block;
+  }
+
+  /* Móvil: panel desplegable */
+  .nav {
+    position: absolute;
+    top: var(--header-h);
+    left: calc(-1 * var(--gutter));
+    right: calc(-1 * var(--gutter));
+    padding: 1rem var(--gutter) 2rem;
+    background: rgb(8 12 18 / 0.97);
+    border-bottom: 1px solid var(--color-border);
+    display: grid;
+    gap: 1.25rem;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-0.75rem);
+    transition:
+      opacity var(--dur) var(--ease-out),
+      transform var(--dur) var(--ease-out),
+      visibility 0s linear var(--dur);
+  }
+  .is-open .nav {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition-delay: 0s;
+  }
+  .nav__list {
+    display: grid;
+  }
+  .nav__link {
+    display: block;
+    padding: 0.85rem 0;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-border);
+    transition: color var(--dur-fast);
+  }
+  .nav__link:hover {
+    color: var(--color-accent-text);
+  }
+  .nav__cta {
+    justify-self: start;
+  }
+
+  @media (min-width: 60rem) {
+    .menu-toggle {
+      display: none;
+    }
+    .nav {
+      position: static;
+      visibility: visible;
+      opacity: 1;
+      transform: none;
+      padding: 0;
+      background: none;
+      border: 0;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      transition: none;
+    }
+    .nav__list {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .nav__link {
+      position: relative;
+      padding: 0.5rem 0.85rem;
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      border: 0;
+    }
+    .nav__link::after {
+      content: '';
+      position: absolute;
+      left: 0.85rem;
+      right: 0.85rem;
+      bottom: 0.2rem;
+      height: 1px;
+      background: var(--orange-500);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--dur) var(--ease-out);
+    }
+    .nav__link:hover::after,
+    .nav__link:focus-visible::after {
+      transform: scaleX(1);
+    }
+  }
+</style>

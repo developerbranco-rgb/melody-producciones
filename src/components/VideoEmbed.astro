@@ -1,0 +1,183 @@
+---
+/**
+ * Video que no bloquea la carga inicial:
+ * - YouTube: muestra la miniatura y carga el reproductor (youtube-nocookie) recién al hacer clic.
+ * - Archivo propio: <video> con preload="none".
+ */
+import Icon from './Icon.astro';
+import type { ArtistVideo } from '../data/types';
+import { withBase } from '../utils/paths';
+import { getUi } from '../i18n';
+import path from 'node:path';
+import { readFileSync } from 'node:fs';
+
+interface Props {
+  video: ArtistVideo;
+}
+const { video } = Astro.props;
+const ui = getUi();
+
+const MIN_RATIO = 9 / 16; // video vertical completo
+const MAX_RATIO = 16 / 9;
+
+/** Dimensiones reales de la portada (jpg/png) para detectar la orientación del video. */
+function posterSize(poster: string): { width: number; height: number } | null {
+  try {
+    const buf = readFileSync(path.resolve(process.cwd(), 'public', poster));
+    if (buf.length > 24 && buf.readUInt32BE(0) === 0x89504e47) {
+      const width = buf.readUInt32BE(16);
+      const height = buf.readUInt32BE(20);
+      return width > 0 && height > 0 ? { width, height } : null;
+    }
+    if (buf.length > 4 && buf.readUInt8(0) === 0xff && buf.readUInt8(1) === 0xd8) {
+      let i = 2;
+      while (i + 9 < buf.length) {
+        const marker = buf.readUInt8(i + 1);
+        const isSof = marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc;
+        if (isSof) {
+          const width = buf.readUInt16BE(i + 7);
+          const height = buf.readUInt16BE(i + 5);
+          return width > 0 && height > 0 ? { width, height } : null;
+        }
+        if (marker === 0x01 || marker === 0xd8 || (marker >= 0xd0 && marker <= 0xd9)) {
+          i += 2;
+        } else {
+          i += 2 + buf.readUInt16BE(i + 2);
+        }
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/** Relación de aspecto del reproductor: la misma del video (según su portada), dentro de límites razonables. */
+function videoRatio(v: ArtistVideo): string {
+  if (v.type === 'file' && v.poster) {
+    const size = posterSize(v.poster);
+    if (size) {
+      const clamped = Math.min(MAX_RATIO, Math.max(MIN_RATIO, size.width / size.height));
+      return `${clamped.toFixed(4).replace(/\.?0+$/, '')}`;
+    }
+  }
+  return '1.7778';
+}
+---
+
+{
+  video.type === 'youtube' ? (
+    <div class="video" data-yt={video.id} data-title={video.title}>
+      <button type="button" class="video__play" data-yt-play>
+        <img
+          src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
+          alt=""
+          width="480"
+          height="360"
+          loading="lazy"
+          decoding="async"
+        />
+        <span class="video__icon" aria-hidden="true">
+          <Icon name="play" size={28} />
+        </span>
+        <span class="sr-only">
+          {ui.artist.playVideo}: {video.title}
+        </span>
+      </button>
+    </div>
+  ) : (
+    <div class="video" style={`--video-ratio: ${videoRatio(video)};`}>
+      <video
+        controls
+        preload="none"
+        playsinline
+        poster={video.poster ? withBase(video.poster) : undefined}
+        aria-label={video.title}
+      >
+        <source src={withBase(video.src)} type="video/mp4" />
+      </video>
+    </div>
+  )
+}
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-yt-play]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const box = btn.closest<HTMLElement>('[data-yt]');
+      if (!box) return;
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${box.dataset.yt}?autoplay=1&rel=0`;
+      iframe.title = box.dataset.title || 'Video';
+      iframe.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+      iframe.allowFullscreen = true;
+      box.replaceChildren(iframe);
+      iframe.focus();
+    });
+  });
+</script>
+
+<style>
+  .video {
+    position: relative;
+    aspect-ratio: var(--video-ratio, 16 / 9);
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: #000;
+    border: 1px solid var(--color-border);
+  }
+  .video :global(iframe),
+  .video video,
+  .video__play,
+  .video__play img {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    object-fit: cover;
+  }
+  /* El video propio se adapta a su orientación: se ve completo, sin recortes ni estiramientos */
+  .video video {
+    object-fit: contain;
+    display: block;
+  }
+  .video__play img {
+    object-fit: cover;
+  }
+  /* En pantallas grandes, un video vertical no deja el reproductor más alto que la vista: se centra al ancho justo */
+  @media (min-width: 48rem) {
+    .video {
+      width: min(100%, calc(72svh * var(--video-ratio, 1.7778)));
+      margin-inline: auto;
+    }
+  }
+  .video__play {
+    position: relative;
+    display: block;
+  }
+  .video__play img {
+    opacity: 0.8;
+    transition:
+      opacity var(--dur),
+      transform 1s var(--ease-out);
+  }
+  .video__play:hover img {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+  .video__icon {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    display: grid;
+    place-items: center;
+    width: 4.25rem;
+    height: 4.25rem;
+    border-radius: 50%;
+    background: var(--orange-500);
+    color: var(--ink-950);
+    box-shadow: var(--glow-orange);
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .video__play:hover .video__icon {
+    transform: scale(1.08);
+  }
+</style>

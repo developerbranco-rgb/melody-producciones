@@ -1,0 +1,175 @@
+---
+/**
+ * Galería de fotos con ampliación en ventana modal (<dialog>).
+ * Las imágenes se optimizan automáticamente (WebP) y se cargan en diferido.
+ */
+import { Image, getImage } from 'astro:assets';
+import Icon from './Icon.astro';
+import type { ResolvedImage } from '../data';
+import { getUi } from '../i18n';
+
+interface Props {
+  images: ResolvedImage[];
+  artistName: string;
+}
+const { images, artistName } = Astro.props;
+const ui = getUi();
+const items = await Promise.all(
+  images.map(async (img) => ({
+    ...img,
+    full: await getImage({ src: img.src, width: Math.min(img.src.width, 1600), format: 'webp' }),
+  }))
+);
+---
+
+<ul role="list" class="gallery" data-gallery>
+  {
+    items.map((img, i) => (
+      <li data-reveal style={`--reveal-delay:${(i % 3) * 80}`}>
+        <button
+          type="button"
+          class="gallery__item"
+          data-full={img.full.src}
+          data-alt={img.alt}
+          data-credit={img.credit ?? ''}
+          aria-haspopup="dialog"
+        >
+          <Image
+            src={img.src}
+            alt={img.alt}
+            widths={[320, 480, 720]}
+            sizes="(min-width: 60rem) 30vw, (min-width: 36rem) 45vw, 92vw"
+            loading="lazy"
+          />
+          <span class="sr-only">— ampliar</span>
+        </button>
+        {img.credit && <p class="gallery__credit">{img.credit}</p>}
+      </li>
+    ))
+  }
+</ul>
+
+<dialog class="lightbox" aria-label={`${ui.artist.gallery}: ${artistName}`} data-lightbox>
+  <button type="button" class="lightbox__close" data-lightbox-close>
+    <Icon name="close" />
+    <span class="sr-only">{ui.catalog.close}</span>
+  </button>
+  <figure>
+    <img alt="" data-lightbox-img />
+    <figcaption data-lightbox-caption></figcaption>
+  </figure>
+</dialog>
+
+<script>
+  const lightbox = document.querySelector<HTMLDialogElement>('[data-lightbox]');
+  const img = lightbox?.querySelector<HTMLImageElement>('[data-lightbox-img]');
+  const caption = lightbox?.querySelector<HTMLElement>('[data-lightbox-caption]');
+  let trigger: HTMLElement | null = null;
+
+  document.querySelectorAll<HTMLButtonElement>('.gallery__item').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (!lightbox || !img || !caption) return;
+      trigger = btn;
+      img.src = btn.dataset.full!;
+      img.alt = btn.dataset.alt!;
+      caption.textContent = [btn.dataset.alt, btn.dataset.credit].filter(Boolean).join(' — ');
+      lightbox.showModal();
+    });
+  });
+  lightbox?.querySelector('[data-lightbox-close]')?.addEventListener('click', () => lightbox.close());
+  lightbox?.addEventListener('click', (e) => {
+    if (e.target === lightbox) lightbox.close();
+  });
+  lightbox?.addEventListener('close', () => trigger?.focus());
+</script>
+
+<style>
+  /* Mosaico tipo masonry: cada foto conserva su proporción real (sin recortes) */
+  .gallery {
+    columns: 1;
+    column-gap: 1rem;
+  }
+  @media (min-width: 36rem) {
+    .gallery {
+      columns: 2;
+    }
+  }
+  @media (min-width: 60rem) {
+    .gallery {
+      columns: 3;
+    }
+  }
+  .gallery > li {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+  .gallery__item {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    cursor: zoom-in;
+  }
+  .gallery__item :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform 1s var(--ease-out);
+  }
+  @media (hover: hover) {
+    .gallery__item:hover :global(img) {
+      transform: scale(1.04);
+    }
+  }
+  .gallery__credit {
+    margin-top: 0.4rem;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+  .lightbox {
+    max-width: min(100% - 1.5rem, 72rem);
+    max-height: calc(100dvh - 1.5rem);
+    margin: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-text);
+    overflow: visible;
+  }
+  .lightbox::backdrop {
+    background: rgb(3 5 8 / 0.92);
+  }
+  .lightbox figure {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .lightbox img {
+    max-height: calc(100dvh - 6rem);
+    max-width: 100%;
+    width: auto;
+    margin-inline: auto;
+    border-radius: var(--radius);
+  }
+  .lightbox figcaption {
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+  .lightbox__close {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    display: grid;
+    place-items: center;
+    width: 2.9rem;
+    height: 2.9rem;
+    border-radius: 50%;
+    background: rgb(6 8 12 / 0.8);
+    border: 1px solid var(--color-border-strong);
+  }
+  .lightbox__close:hover {
+    background: var(--orange-500);
+    color: var(--ink-950);
+  }
+</style>

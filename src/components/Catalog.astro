@@ -1,0 +1,98 @@
+---
+/**
+ * Catálogo de artistas: tarjetas iguales + una vista rápida (<dialog>) por artista.
+ */
+import ArtistCard from './ArtistCard.astro';
+import QuickView from './QuickView.astro';
+import SectionHeading from './SectionHeading.astro';
+import { getArtists } from '../data';
+import { getUi } from '../i18n';
+
+const ui = getUi();
+const artists = getArtists();
+---
+
+<section id="artistas" class="section catalog" aria-labelledby="artistas-titulo">
+  <div class="container">
+    <SectionHeading eyebrow={ui.catalog.eyebrow} title={ui.catalog.title} id="artistas-titulo">
+      <p class="lead">{ui.catalog.intro}</p>
+    </SectionHeading>
+
+    <ul role="list" class="catalog__grid">
+      {
+        artists.map((artist, i) => (
+          <li>
+            <ArtistCard artist={artist} index={i} />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  {artists.map((artist, i) => <QuickView artist={artist} index={i} />)}
+</section>
+
+<script>
+  // Apertura y cierre de las vistas rápidas
+  let lastTrigger: HTMLElement | null = null;
+
+  document.querySelectorAll<HTMLButtonElement>('[data-dialog-open]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const dialog = document.getElementById(btn.dataset.dialogOpen!) as HTMLDialogElement | null;
+      if (!dialog) return;
+      lastTrigger = btn;
+      dialog.showModal();
+    });
+  });
+
+  document.querySelectorAll<HTMLDialogElement>('dialog.qv').forEach((dialog) => {
+    dialog.querySelector('[data-dialog-close]')?.addEventListener('click', () => dialog.close());
+    // Clic en el fondo oscuro (fuera del panel) cierra la vista
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('close', () => {
+      lastTrigger?.focus();
+    });
+  });
+</script>
+
+<style>
+  .catalog {
+    background:
+      radial-gradient(60% 40% at 100% 0%, rgb(46 125 181 / 0.12), transparent 70%),
+      radial-gradient(50% 40% at 0% 100%, rgb(242 106 27 / 0.08), transparent 70%);
+  }
+  .catalog__grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 36rem) {
+    .catalog__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  /* Tablet/escritorio: 6 columnas virtuales para centrar la última fila (catálogo equilibrado) */
+  @media (min-width: 60rem) {
+    .catalog__grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .catalog__grid > li {
+      grid-column: span 2;
+    }
+    .catalog__grid > li:nth-last-child(2):nth-child(3n + 1) {
+      grid-column: 2 / span 2;
+    }
+    .catalog__grid > li:last-child:nth-child(3n + 1) {
+      grid-column: 3 / span 2;
+    }
+  }
+  @media (min-width: 36rem) and (max-width: 59.99rem) {
+    .catalog__grid > li:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+      width: calc(50% - 0.75rem);
+      justify-self: center;
+    }
+  }
+</style>

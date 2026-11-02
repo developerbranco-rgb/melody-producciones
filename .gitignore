@@ -1,0 +1,25 @@
+# Dependencias y compilados
+node_modules/
+dist/
+.astro/
+
+# Pruebas
+test-results/
+playwright-report/
+blob-report/
+reports/lighthouse-*.json
+
+# Entorno y secretos (nunca subirlos)
+.env
+.env.*
+!.env.example
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.log
+npm-debug.log*

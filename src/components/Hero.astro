@@ -1,0 +1,307 @@
+---
+/**
+ * Portada cinematográfica. Escenario con luces animadas (CSS, sin video ni librerías),
+ * logo original sobre placa crema (el logo tiene letras oscuras) y "créditos" con todos
+ * los artistas en igualdad de jerarquía.
+ */
+import { Image } from 'astro:assets';
+import logo from '../assets/brand/originales/logo-melody-producciones.png';
+import Icon from './Icon.astro';
+import { site, getArtists } from '../data';
+import { getUi } from '../i18n';
+
+const ui = getUi();
+const artists = getArtists();
+---
+
+<section id="inicio" class="hero" aria-labelledby="hero-titulo">
+  <div class="hero__stage" aria-hidden="true">
+    <span class="light light--a"></span>
+    <span class="light light--b"></span>
+    <span class="light light--c"></span>
+    <span class="hero__curtain"></span>
+    <span class="hero__floor"></span>
+  </div>
+
+  <div class="container hero__content">
+    <p class="eyebrow hero__eyebrow">{ui.hero.eyebrow}</p>
+    <h1 id="hero-titulo" class="hero__title">
+      <span class="hero__plate">
+        <Image
+          src={logo}
+          alt={site.name}
+          widths={[320, 480, 640, 960, 1280]}
+          sizes="(min-width: 48rem) 34rem, 82vw"
+          loading="eager"
+          fetchpriority="high"
+          class="hero__logo"
+        />
+      </span>
+    </h1>
+    <p class="hero__tagline">{site.tagline}</p>
+    <div class="hero__ctas">
+      <a class="btn btn--primary hero__cta" href="#artistas">
+        {ui.hero.cta}
+        <Icon name="arrow-right" />
+      </a>
+      <a class="btn btn--ghost" href="#contacto">{ui.hero.secondaryCta}</a>
+    </div>
+  </div>
+
+  <nav class="hero__credits container" aria-label={ui.hero.creditsLabel}>
+    <ul role="list">
+      {
+        artists.map((a, i) => (
+          <li style={`--i:${i}`}>
+            <a href={a.url}>{a.name}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding-top: calc(var(--header-h) + 2rem);
+    padding-bottom: 1.75rem;
+    overflow: hidden;
+    isolation: isolate;
+    background: radial-gradient(120% 80% at 50% 0%, var(--navy-800) 0%, var(--ink-950) 62%);
+  }
+
+  /* ---------- Escenario ---------- */
+  .hero__stage {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .light {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.55;
+    will-change: transform;
+  }
+  .light--a {
+    width: 60vmax;
+    height: 60vmax;
+    left: -22vmax;
+    top: -18vmax;
+    background: radial-gradient(circle, rgb(242 106 27 / 0.75), transparent 62%);
+    animation: drift-a 18s var(--ease-cine) infinite alternate;
+  }
+  .light--b {
+    width: 55vmax;
+    height: 55vmax;
+    right: -24vmax;
+    top: 6vmax;
+    background: radial-gradient(circle, rgb(46 125 181 / 0.8), transparent 62%);
+    animation: drift-b 22s var(--ease-cine) infinite alternate;
+  }
+  .light--c {
+    width: 34vmax;
+    height: 34vmax;
+    left: 50%;
+    bottom: -20vmax;
+    margin-left: -17vmax;
+    background: radial-gradient(circle, rgb(251 243 228 / 0.35), transparent 65%);
+    animation: pulse 9s ease-in-out infinite alternate;
+  }
+  .hero__curtain {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0) 0 38px,
+      rgb(255 255 255 / 0.018) 38px 40px,
+      rgb(0 0 0 / 0.05) 40px 78px
+    );
+    mask-image: linear-gradient(to bottom, #000, transparent 85%);
+  }
+  .hero__floor {
+    position: absolute;
+    inset: auto 0 0;
+    height: 35%;
+    background: linear-gradient(to top, var(--ink-950), transparent);
+  }
+  @keyframes drift-a {
+    to {
+      transform: translate3d(14vmax, 10vmax, 0) scale(1.1);
+    }
+  }
+  @keyframes drift-b {
+    to {
+      transform: translate3d(-12vmax, 8vmax, 0) scale(0.92);
+    }
+  }
+  @keyframes pulse {
+    to {
+      transform: scale(1.25);
+      opacity: 0.8;
+    }
+  }
+
+  /* ---------- Contenido ---------- */
+  .hero__content {
+    align-self: center;
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: 1.6rem;
+    padding-block: 2rem;
+  }
+  .hero__title {
+    margin: 0;
+    font-size: inherit;
+  }
+  .hero__plate {
+    position: relative;
+    display: block;
+    width: min(82vw, 34rem);
+    padding: clamp(1rem, 3vw, 1.75rem) clamp(1.1rem, 4vw, 2.4rem);
+    border-radius: var(--radius-lg);
+    background: var(--cream-50);
+    box-shadow:
+      0 0 0 1px rgb(251 243 228 / 0.4),
+      0 30px 90px -20px rgb(242 106 27 / 0.45),
+      0 40px 80px -30px rgb(0 0 0 / 0.9);
+  }
+  .hero__plate::after {
+    /* Filete interior, como una marquesina de teatro */
+    content: '';
+    position: absolute;
+    inset: 0.45rem;
+    border: 1px solid rgb(11 36 51 / 0.16);
+    border-radius: calc(var(--radius-lg) - 0.35rem);
+    pointer-events: none;
+  }
+  .hero__plate :global(.hero__logo) {
+    width: 100%;
+    height: auto;
+  }
+  .hero__tagline {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: var(--text-2xl);
+    line-height: 1.15;
+    max-width: 22ch;
+    color: var(--cream-50);
+    text-wrap: balance;
+  }
+  .hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+  }
+  .hero__cta {
+    min-height: 3.4rem;
+    padding-inline: 1.8rem;
+    font-size: var(--text-base);
+  }
+
+  /* ---------- Créditos ---------- */
+  .hero__credits ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .hero__credits li {
+    display: inline-flex;
+    align-items: center;
+  }
+  .hero__credits ul {
+    gap: 0 1.4rem;
+  }
+  @media (min-width: 64rem) {
+    /* Separadores sólo cuando los cinco nombres entran en una línea */
+    .hero__credits ul {
+      gap: 0.35rem 0;
+    }
+    .hero__credits li + li::before {
+      content: '';
+      width: 4px;
+      height: 4px;
+      margin-inline: 0.9rem;
+      border-radius: 50%;
+      background: var(--orange-500);
+    }
+  }
+  @media (max-width: 47.99rem) {
+    .hero {
+      padding-bottom: 5.5rem; /* deja libre el botón flotante de WhatsApp */
+    }
+    .hero__eyebrow::before {
+      display: none;
+    }
+  }
+  .hero__credits a {
+    display: inline-block;
+    padding-block: 0.6rem;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-text-muted);
+    transition: color var(--dur-fast);
+  }
+  .hero__credits a:hover {
+    color: var(--cream-50);
+  }
+
+  /* ---------- Entrada cinematográfica ---------- */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__eyebrow,
+    .hero__plate,
+    .hero__tagline,
+    .hero__ctas,
+    .hero__credits li {
+      animation: rise 1.1s var(--ease-out) both;
+    }
+    .hero__plate {
+      animation-name: rise-focus;
+      animation-duration: 1.6s;
+      animation-delay: 0.1s;
+    }
+    .hero__eyebrow {
+      animation-delay: 0.45s;
+    }
+    .hero__tagline {
+      animation-delay: 0.6s;
+    }
+    .hero__ctas {
+      animation-delay: 0.78s;
+    }
+    .hero__credits li {
+      animation-delay: calc(0.95s + var(--i) * 0.08s);
+    }
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+  }
+  @keyframes rise-focus {
+    from {
+      opacity: 0;
+      transform: scale(0.94);
+      filter: blur(10px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .light {
+      animation: none;
+    }
+  }
+</style>

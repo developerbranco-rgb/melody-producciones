@@ -1,0 +1,145 @@
+---
+/**
+ * Contacto directo (sin formulario): WhatsApp, correo y ubicación.
+ * Las redes sociales aparecen solamente si están cargadas en src/data/site.ts
+ */
+import SectionHeading from './SectionHeading.astro';
+import Icon from './Icon.astro';
+import { site, generalWhatsappUrl } from '../data';
+import { getUi } from '../i18n';
+import { buildMailto } from '../utils/whatsapp';
+
+const ui = getUi();
+const mailto = buildMailto(site.contact.email, ui.contact.emailSubject);
+---
+
+<section id="contacto" class="section contact" aria-labelledby="contacto-titulo">
+  <div class="contact__glow" aria-hidden="true"></div>
+  <div class="container">
+    <SectionHeading eyebrow={ui.contact.eyebrow} title={ui.contact.title} id="contacto-titulo" align="center">
+      <p class="lead">{ui.contact.intro}</p>
+    </SectionHeading>
+
+    <ul role="list" class="contact__grid">
+      <li class="contact-card contact-card--wa" data-reveal>
+        <span class="contact-card__icon"><Icon name="whatsapp" size={26} /></span>
+        <h3>{ui.contact.whatsapp}</h3>
+        <p class="contact-card__value">{site.contact.whatsappDisplay}</p>
+        <a class="btn btn--primary" href={generalWhatsappUrl} target="_blank" rel="noopener" data-testid="contact-whatsapp">
+          {ui.contact.whatsappAction}<span class="sr-only"> {ui.artist.opensNewTab}</span>
+          <Icon name="arrow-right" />
+        </a>
+      </li>
+      <li class="contact-card" data-reveal style="--reveal-delay:100">
+        <span class="contact-card__icon"><Icon name="mail" size={26} /></span>
+        <h3>{ui.contact.email}</h3>
+        <p class="contact-card__value contact-card__value--email">{site.contact.email}</p>
+        <a class="btn btn--light" href={mailto} data-testid="contact-email">
+          {ui.contact.emailAction}
+          <Icon name="arrow-right" />
+        </a>
+      </li>
+      <li class="contact-card" data-reveal style="--reveal-delay:200">
+        <span class="contact-card__icon"><Icon name="pin" size={26} /></span>
+        <h3>{ui.contact.location}</h3>
+        <p class="contact-card__value">{site.contact.location}</p>
+      </li>
+    </ul>
+
+    {
+      site.socials.length > 0 && (
+        <div class="contact__socials">
+          <h3>{ui.contact.socials}</h3>
+          <ul role="list">
+            {site.socials.map((s) => (
+              <li>
+                <a class="btn btn--ghost btn--sm" href={s.url} target="_blank" rel="noopener">
+                  {s.label}
+                  <span class="sr-only"> {ui.artist.opensNewTab}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .contact {
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .contact__glow {
+    position: absolute;
+    inset: auto 0 -30% 0;
+    height: 80%;
+    z-index: -1;
+    background:
+      radial-gradient(50% 60% at 30% 100%, rgb(242 106 27 / 0.22), transparent 70%),
+      radial-gradient(50% 60% at 75% 100%, rgb(46 125 181 / 0.25), transparent 70%);
+  }
+  .contact__grid {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .contact-card {
+    display: grid;
+    justify-items: start;
+    align-content: start;
+    gap: 0.6rem;
+    padding: 1.75rem;
+    border-radius: var(--radius-lg);
+    background: rgb(10 15 22 / 0.75);
+    border: 1px solid var(--color-border);
+    transition:
+      border-color var(--dur) ease,
+      transform var(--dur) var(--ease-out);
+  }
+  .contact-card:hover {
+    border-color: var(--color-border-strong);
+  }
+  .contact-card--wa {
+    border-color: rgb(242 106 27 / 0.45);
+    background: linear-gradient(160deg, rgb(242 106 27 / 0.14), rgb(10 15 22 / 0.8) 60%);
+  }
+  .contact-card__icon {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.06);
+    border: 1px solid var(--color-border);
+    color: var(--color-accent-text);
+  }
+  .contact-card h3 {
+    font-size: var(--text-xl);
+  }
+  .contact-card__value {
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+    margin-bottom: 0.6rem;
+  }
+  .contact-card__value--email {
+    font-size: var(--text-base);
+    overflow-wrap: anywhere;
+  }
+  .contact__socials {
+    margin-top: 2.5rem;
+    text-align: center;
+  }
+  .contact__socials ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+  @media (min-width: 52rem) {
+    .contact__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

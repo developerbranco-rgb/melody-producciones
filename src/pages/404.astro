@@ -1,0 +1,64 @@
+---
+/** Página 404: GitHub Pages la muestra automáticamente para direcciones inexistentes. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { getArtists } from '../data';
+import { getUi } from '../i18n';
+import { withBase, homeSection } from '../utils/paths';
+
+const ui = getUi();
+const artists = getArtists();
+---
+
+<BaseLayout title={ui.notFound.title} noindex>
+  <section class="nf">
+    <div class="container nf__box">
+      <p class="eyebrow">Error 404</p>
+      <h1>{ui.notFound.title}</h1>
+      <p class="lead">{ui.notFound.text}</p>
+      <div class="nf__actions">
+        <a class="btn btn--primary" href={withBase()}>
+          <Icon name="arrow-left" />
+          {ui.notFound.cta}
+        </a>
+        <a class="btn btn--ghost" href={homeSection('artistas')}>{ui.nav.artists}</a>
+      </div>
+      <ul role="list" class="nf__list" aria-label={ui.nav.artists}>
+        {artists.map((a) => <li><a class="text-link" href={a.url}>{a.name}</a></li>)}
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    min-height: 80svh;
+    display: grid;
+    align-items: center;
+    padding-top: calc(var(--header-h) + 3rem);
+    padding-bottom: 4rem;
+    background: radial-gradient(60% 50% at 50% 0%, var(--navy-800), transparent 70%);
+  }
+  .nf__box {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: 1.2rem;
+  }
+  h1 {
+    font-size: var(--text-4xl);
+  }
+  .nf__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+  .nf__list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
+    margin-top: 1.5rem;
+  }
+</style>

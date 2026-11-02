@@ -1,0 +1,118 @@
+---
+/**
+ * Imagen principal de un artista.
+ * - Si hay fotos cargadas: muestra la primera, optimizada (AVIF/WebP) y con carga diferida.
+ * - Si no hay fotos: muestra un póster gráfico con el nombre (claramente gráfico, no una foto).
+ */
+import { Picture } from 'astro:assets';
+import Icon from './Icon.astro';
+import type { ResolvedArtist } from '../data';
+
+interface Props {
+  artist: ResolvedArtist;
+  /** Atributo sizes para imágenes responsive. */
+  sizes?: string;
+  loading?: 'lazy' | 'eager';
+  /** Tamaño de tipografía del póster gráfico. */
+  variant?: 'card' | 'hero' | 'mini';
+  /** Índice para variar levemente la iluminación del póster. */
+  index?: number;
+}
+
+const { artist, sizes = '(min-width: 80rem) 20vw, (min-width: 60rem) 30vw, (min-width: 36rem) 45vw, 92vw', loading = 'lazy', variant = 'card', index = 0 } = Astro.props;
+const cover = artist.cover;
+const motifIcons = artist.motif === 'both' ? (['mask', 'note'] as const) : artist.motif === 'humor' ? (['mask'] as const) : (['note'] as const);
+// Variación sutil de luz entre pósters (siempre con la misma paleta, para un catálogo equilibrado)
+const angle = [18, -14, 30, -22, 8][index % 5];
+---
+
+{
+  cover ? (
+    <Picture
+      src={cover.src}
+      alt={cover.alt}
+      formats={['avif', 'webp']}
+      widths={variant === 'hero' ? [480, 800, 1200] : [360, 560, 800]}
+      sizes={sizes}
+      loading={loading}
+      decoding="async"
+      class={`poster poster--photo poster--${variant}`}
+      pictureAttributes={{ class: 'poster-picture' }}
+    />
+  ) : (
+    <div class={`poster poster--graphic poster--${variant}`} style={`--angle:${angle}deg`} aria-hidden="true">
+      <span class="poster__beam" />
+      <span class="poster__motif">
+        {motifIcons.map((m) => (
+          <Icon name={m} size="100%" />
+        ))}
+      </span>
+      <span class="poster__frame" />
+    </div>
+  )
+}
+
+<style>
+  .poster {
+    width: 100%;
+    height: 100%;
+  }
+  :global(.poster-picture) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  :global(img.poster--photo) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .poster--graphic {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+      radial-gradient(120% 70% at 50% 110%, rgb(242 106 27 / 0.28), transparent 60%),
+      radial-gradient(90% 60% at 50% -10%, rgb(46 125 181 / 0.35), transparent 65%),
+      linear-gradient(160deg, var(--navy-700), var(--ink-900) 55%, var(--ink-950));
+  }
+  .poster__beam {
+    position: absolute;
+    inset: -30% 20% 10%;
+    background: linear-gradient(to bottom, rgb(251 243 228 / 0.18), transparent 75%);
+    clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%);
+    transform: rotate(var(--angle));
+    transform-origin: 50% 0;
+    filter: blur(6px);
+    z-index: -1;
+  }
+  .poster__motif {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    gap: 6%;
+    width: 46%;
+    margin-top: -12%;
+    color: rgb(255 138 61 / 0.9);
+    filter: drop-shadow(0 0 22px rgb(242 106 27 / 0.35));
+  }
+  .poster__motif :global(svg) {
+    flex: 1;
+    max-width: 62%;
+    height: auto;
+    aspect-ratio: 1;
+    stroke-width: 0.9;
+  }
+  .poster--mini .poster__motif {
+    width: 40%;
+  }
+  .poster__frame {
+    position: absolute;
+    inset: 0.65rem;
+    border: 1px solid rgb(251 243 228 / 0.14);
+    border-radius: calc(var(--radius) - 0.4rem);
+    pointer-events: none;
+  }
+</style>

@@ -1,0 +1,72 @@
+/**
+ * TOKENS VISUALES — MELODY PRODUCCIONES
+ * Paleta derivada del logo: anaranjado, azul marino, negro y blanco/crema.
+ * Cambiar un valor acá actualiza todo el sitio.
+ */
+:root {
+  /* Negros con matiz azul (fondo cinematográfico) */
+  --ink-950: #06080c;
+  --ink-900: #0a0f16;
+  --ink-850: #0e151e;
+
+  /* Azules de marca */
+  --navy-800: #0b2433;
+  --navy-700: #0f3247;
+  --blue-500: #2e7db5;
+  --blue-300: #8fc6ec; /* azul legible sobre fondo oscuro */
+
+  /* Anaranjados de marca */
+  --orange-600: #e05a10;
+  --orange-500: #f26a1b; /* tono del logo */
+  --orange-400: #ff8a3d; /* texto/acentos sobre fondo oscuro */
+
+  /* Blancos */
+  --cream-50: #fbf3e4; /* fondo del emblema */
+  --white: #ffffff;
+
+  /* Roles */
+  --color-bg: var(--ink-950);
+  --color-surface: var(--ink-900);
+  --color-surface-2: var(--ink-850);
+  --color-text: #f4efe6;
+  --color-text-muted: #b9c0ca;
+  --color-accent: var(--orange-500);
+  --color-accent-text: var(--orange-400);
+  --color-accent-2: var(--blue-300);
+  --color-border: rgb(255 255 255 / 0.1);
+  --color-border-strong: rgb(255 255 255 / 0.22);
+  --color-focus: var(--orange-400);
+  --whatsapp: #25d366;
+
+  /* Tipografía */
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-body: 'Manrope Variable', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+
+  --text-xs: 0.78rem;
+  --text-sm: 0.9rem;
+  --text-base: 1rem;
+  --text-lg: clamp(1.08rem, 1rem + 0.35vw, 1.25rem);
+  --text-xl: clamp(1.3rem, 1.1rem + 0.8vw, 1.7rem);
+  --text-2xl: clamp(1.7rem, 1.3rem + 1.6vw, 2.6rem);
+  --text-3xl: clamp(2.2rem, 1.5rem + 3vw, 4rem);
+  --text-4xl: clamp(2.6rem, 1.6rem + 4.5vw, 5.4rem);
+
+  /* Espaciado y forma */
+  --space-section: clamp(4.5rem, 3rem + 7vw, 9rem);
+  --gutter: clamp(1.15rem, 0.8rem + 2vw, 2.5rem);
+  --container: 76rem;
+  --radius-sm: 0.5rem;
+  --radius: 0.9rem;
+  --radius-lg: 1.4rem;
+  --header-h: 4.5rem;
+
+  /* Movimiento */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-cine: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 180ms;
+  --dur: 380ms;
+  --dur-slow: 900ms;
+
+  --shadow-lg: 0 30px 60px -20px rgb(0 0 0 / 0.65);
+  --glow-orange: 0 0 0 1px rgb(242 106 27 / 0.35), 0 20px 50px -18px rgb(242 106 27 / 0.55);
+}

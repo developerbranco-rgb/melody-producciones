@@ -1,0 +1,132 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import Icon from './Icon.astro';
+import { getUi } from '../i18n';
+
+const ui = getUi();
+---
+
+<section id="nosotros" class="section about" aria-labelledby="nosotros-titulo">
+  <div class="container about__grid">
+    <div>
+      <SectionHeading eyebrow={ui.about.eyebrow} title={ui.about.title} id="nosotros-titulo" />
+      <div class="about__text" data-reveal>
+        {ui.about.paragraphs.map((p) => <p>{p}</p>)}
+      </div>
+    </div>
+
+    <div class="about__aside">
+      <div class="panel" data-reveal style="--reveal-delay:120">
+        <h3 class="panel__title">
+          <Icon name="mask" size={22} />
+          {ui.about.audienceTitle}
+        </h3>
+        <ul role="list" class="chips">
+          {ui.about.audience.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+
+      <div class="panel" data-reveal style="--reveal-delay:220">
+        <h3 class="panel__title">
+          <Icon name="note" size={22} />
+          {ui.about.stepsTitle}
+        </h3>
+        <ol role="list" class="steps">
+          {
+            ui.about.steps.map((s, i) => (
+              <li>
+                <span class="steps__n" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span>
+                  <strong>{s.title}.</strong> {s.text}
+                </span>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about {
+    background: linear-gradient(to bottom, var(--ink-950), var(--ink-900) 40%, var(--ink-950));
+    border-block: 1px solid var(--color-border);
+  }
+  .about__grid {
+    display: grid;
+    gap: 3rem;
+  }
+  .about__text {
+    display: grid;
+    gap: 1.2rem;
+    font-size: var(--text-lg);
+    color: var(--color-text-muted);
+    max-width: 38rem;
+  }
+  .about__text p:first-child {
+    color: var(--color-text);
+  }
+  .about__aside {
+    display: grid;
+    gap: 1.25rem;
+    align-content: start;
+  }
+  .panel {
+    padding: 1.6rem;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(160deg, rgb(15 50 71 / 0.55), rgb(10 15 22 / 0.6));
+    border: 1px solid var(--color-border);
+  }
+  .panel__title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.1rem;
+    font-size: var(--text-xl);
+  }
+  .panel__title :global(svg) {
+    color: var(--color-accent-text);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .chips li {
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border-strong);
+    font-size: var(--text-sm);
+    background: rgb(255 255 255 / 0.03);
+  }
+  .steps {
+    display: grid;
+    gap: 1rem;
+  }
+  .steps li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: baseline;
+    color: var(--color-text-muted);
+  }
+  .steps strong {
+    color: var(--color-text);
+  }
+  .steps__n {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-style: italic;
+    color: var(--color-accent-text);
+    line-height: 1;
+  }
+  @media (min-width: 60rem) {
+    .about__grid {
+      grid-template-columns: 1.15fr 1fr;
+      gap: 5rem;
+    }
+  }
+</style>

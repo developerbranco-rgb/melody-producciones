@@ -1,0 +1,52 @@
+---
+/** Botón flotante de WhatsApp. En perfiles de artista recibe el mensaje personalizado. */
+import Icon from './Icon.astro';
+import { generalWhatsappUrl } from '../data';
+import { getUi } from '../i18n';
+
+interface Props {
+  href?: string;
+}
+const { href = generalWhatsappUrl } = Astro.props;
+const ui = getUi();
+---
+
+<aside aria-label="Contacto rápido">
+  <a class="wa-float" href={href} target="_blank" rel="noopener" data-testid="whatsapp-float">
+    <Icon name="whatsapp" size={28} />
+    <span class="sr-only">{ui.floating.whatsapp} {ui.artist.opensNewTab}</span>
+  </a>
+</aside>
+
+<style>
+  .wa-float {
+    position: fixed;
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    z-index: 60;
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: var(--whatsapp);
+    color: #06210f;
+    box-shadow:
+      0 12px 28px -8px rgb(0 0 0 / 0.6),
+      0 0 0 4px rgb(37 211 102 / 0.18);
+    transition:
+      transform var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out);
+  }
+  .wa-float:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow:
+      0 16px 34px -8px rgb(0 0 0 / 0.7),
+      0 0 0 6px rgb(37 211 102 / 0.25);
+  }
+  .wa-float:focus-visible {
+    outline-color: var(--white);
+    outline-offset: 4px;
+    border-radius: 50%;
+  }
+</style>
