@@ -19,7 +19,8 @@ export const es = {
     eyebrow: 'Productora artística · Rosario',
     cta: 'Encontrá el espectáculo ideal',
     secondaryCta: 'Contactanos',
-    creditsLabel: 'Artistas de Melody Producciones',
+    creditsTitle: 'Consultanos por tus artistas preferidos',
+    creditsText: 'Si buscás otro tipo de artistas, también te los conseguimos.',
     scroll: 'Ver artistas',
   },
   catalog: {

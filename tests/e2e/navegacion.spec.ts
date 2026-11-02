@@ -25,10 +25,13 @@ test.describe('Navegación y perfiles', () => {
     }
   });
 
-  test('los créditos de la portada enlazan a todos los perfiles', async ({ page }) => {
+  test('la portada invita a consultar por artistas a pedido', async ({ page }) => {
     await page.goto('');
-    const credits = page.getByRole('navigation', { name: 'Artistas de Melody Producciones' }).getByRole('link');
-    await expect(credits).toHaveCount(ARTISTS.length);
+    const cta = page.getByRole('link', { name: /Consultanos por tus artistas preferidos/ });
+    await expect(cta).toHaveAttribute('href', '#contacto');
+    await expect(page.locator('.hero__credits')).toContainText(
+      'Si buscás otro tipo de artistas, también te los conseguimos.'
+    );
   });
 
   for (const a of ARTISTS) {

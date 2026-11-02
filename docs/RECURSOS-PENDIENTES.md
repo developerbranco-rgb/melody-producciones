@@ -7,7 +7,7 @@ Estado actualizado tras integrar las fotos y los videos de los artistas. Lo marc
 | Pendiente | Detalle | Quién |
 |---|---|---|
 | Crear el repositorio en GitHub y activar Pages | Pasos 5 y 6 de `docs/GUIA-DE-MANTENIMIENTO.md`. Hasta hacerlo, el sitio **no está publicado**. | Usuario |
-| Confirmar textos institucionales | Revisar y aprobar el eslogan ("Música y humor en vivo para cada escenario"), el texto de "Sobre nosotros", la lista "Propuestas para" y los pasos "Cómo consultar" (`src/i18n/es.ts`, `src/data/site.ts`). Fueron redactados por el desarrollador sin afirmar datos no confirmados. | Usuario |
+| Confirmar textos institucionales | Revisar y aprobar el eslogan ("Elegí el espectáculo que necesitas para tu evento"), el texto de "Sobre nosotros", la lista "Propuestas para" y los pasos "Cómo consultar" (`src/i18n/es.ts`, `src/data/site.ts`). Fueron redactados por el desarrollador sin afirmar datos no confirmados. | Usuario |
 
 > El logo **ya fue recibido** e integrado (`src/assets/brand/originales/`). No bloquea.
 > Las fotos y los videos **ya están integrados y optimizados**. Si todavía faltan biografías o descripciones, cada perfil igual muestra la portada, la galería, los videos, la disciplina y los botones de contratación.

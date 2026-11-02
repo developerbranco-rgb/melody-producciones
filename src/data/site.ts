@@ -15,7 +15,7 @@ export interface SocialLink {
 export const site = {
   name: 'Melody Producciones',
   /** Eslogan visible en la portada. */
-  tagline: 'Música y humor en vivo para cada escenario',
+  tagline: 'Elegí el espectáculo que necesitas para tu evento',
   description:
     'Melody Producciones es una productora artística de Rosario, Santa Fe, dedicada a la representación, promoción y contratación de artistas de música y humor.',
   locale: 'es-AR',
